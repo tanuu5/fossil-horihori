@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.env.*
+# 開発中の撮影（window.__dev.shot / dev-harness の shoot.mjs）
+shots/
+# Claude Code のローカル設定（launch.json など。公開しない）
+.claude/
+
+# 引き継ぎメモ（公開しない）
+notes/

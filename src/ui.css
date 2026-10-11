@@ -1,0 +1,71 @@
+/* 画面の「構造」：重なり順、全画面の配置、スマホの安全な余白、タッチ操作の置き場所、ボタンの絵の大きさ。
+   どの作品でもほぼそのまま使う。見た目（色・字・ボタンの形・タイトルの飾り）は theme.css に書く。
+   スマホ：ノッチ・角丸を避ける（env(safe-area-inset-*)）、縦持ち・横持ちの両方で崩れないようにする。
+   言語で配置を変えるときは html[lang="en"] … のように書く（setLang が html の lang を変える）。 */
+:root {
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden;
+  -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+/* touch-action は祖先と重なって効くので、none はゲーム画面とタッチ操作だけに付ける（設定のつまみ・スクロールを殺さない）。
+   全体には manipulation（スクロールとつまみはそのまま、ダブルタップの拡大だけをしない） */
+html, body, button { touch-action: manipulation; }
+#app, #app canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+#ui { position: fixed; inset: 0; pointer-events: none; }
+#ui > * { pointer-events: auto; }
+.hidden { display: none !important; }
+
+#loading { position: fixed; inset: 0; display: grid; place-items: center; z-index: 50; transition: opacity 0.5s; }
+#loading.done { opacity: 0; pointer-events: none; }
+
+/* 撮影ツールは CSS のアニメーションを止められず、途中の色で写るので、選択の色の切り替えにはアニメーションを付けない */
+.gp-focus { outline-offset: 3px; }
+
+/* タイトル：全画面の重ね。中の並び（縦・横・左寄せ）は theme.css で変えてよい */
+.screen#title { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: calc(16px + var(--safe-t)) calc(16px + var(--safe-r)) calc(16px + var(--safe-b)) calc(16px + var(--safe-l)); pointer-events: none; }
+#title > * { position: relative; }
+#title .menu { display: flex; flex-direction: column; pointer-events: auto; }
+#title .copyright { position: absolute; left: 0; right: 0; bottom: calc(10px + var(--safe-b)); text-align: center; }
+
+/* 重なる画面（一時停止・設定・あそびかた） */
+.modal { position: absolute; inset: 0; display: grid; place-items: center; z-index: 10;
+  padding: calc(12px + var(--safe-t)) calc(12px + var(--safe-r)) calc(12px + var(--safe-b)) calc(12px + var(--safe-l)); }
+.card { width: min(26em, 100%); max-height: 100%; overflow: auto; display: flex; flex-direction: column; align-items: stretch; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 1em; }
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 0.5em 1em; align-items: center; }
+.keys dt { text-align: right; }
+.keys dd { margin: 0; }
+
+/* ゲーム中の表示 */
+#hud { position: absolute; inset: 0; pointer-events: none; }
+#hud .score { position: absolute; top: calc(12px + var(--safe-t)); left: calc(16px + var(--safe-l)); }
+#hud .hints { position: absolute; bottom: calc(12px + var(--safe-b)); left: calc(16px + var(--safe-l)); display: flex; gap: 1em; }
+#hud .hints span { display: flex; align-items: center; gap: 0.35em; }
+[data-device="touch"] #hud .hints { display: none; }
+
+/* ボタンの絵（ui/glyphs.js） */
+.gl { display: inline-flex; align-items: center; justify-content: center; min-width: 1.7em; height: 1.7em; padding: 0 0.35em; margin: 0 0.08em;
+  border-radius: 6px; font: 700 0.8em/1 system-ui, sans-serif; vertical-align: middle; }
+.gl svg { width: 1.3em; height: 1.3em; }
+.gl-face { border-radius: 50%; width: 1.7em; padding: 0; }
+.gl-pill { border-radius: 999px; padding: 0 0.6em; }
+.gl-stick b { font-size: 0.7em; margin-left: 0.1em; }
+.gl-mouse { padding: 0 0.15em; }
+.gl-or { margin: 0 0.15em; opacity: 0.7; }
+
+/* タッチ操作：スティックは押した場所に出る。ボタンは slot-0〜3（右下から親指の届く順） */
+#touch { position: absolute; inset: 0; pointer-events: none; touch-action: none; }
+#touch .stick { position: absolute; width: 120px; height: 120px; border-radius: 50%; left: calc(40px + var(--safe-l)); bottom: calc(40px + var(--safe-b)); }
+#touch .stick.on { bottom: auto; }
+#touch .knob { position: absolute; left: 35px; top: 35px; width: 50px; height: 50px; border-radius: 50%; }
+#touch .tbtn { position: absolute; pointer-events: auto; min-width: 0; padding: 0; border-radius: 50%; width: 76px; height: 76px; }
+#touch .slot-0 { width: 92px; height: 92px; right: calc(24px + var(--safe-r)); bottom: calc(32px + var(--safe-b)); }
+#touch .slot-1 { right: calc(130px + var(--safe-r)); bottom: calc(24px + var(--safe-b)); }
+#touch .slot-2 { right: calc(36px + var(--safe-r)); bottom: calc(138px + var(--safe-b)); }
+#touch .slot-3 { right: calc(124px + var(--safe-r)); bottom: calc(118px + var(--safe-b)); }
+#touch .tbtn.pause { width: 46px; height: 46px; top: calc(10px + var(--safe-t)); bottom: auto; right: calc(12px + var(--safe-r)); }
